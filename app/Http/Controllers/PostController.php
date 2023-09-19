@@ -16,7 +16,7 @@ class PostController extends Controller
         // $posts = Post::where('category_id', $category->id)->get();
 
         $post = Post::find(1);
-        dd($post->category);
+        dd($post->tags);
 
 
         // return view('post.index', compact('posts'));
