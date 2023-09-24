@@ -5,21 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\Category;
+use App\Models\Tag;
+use App\Models\PostTag;
 
 class PostController extends Controller
 {
     public function index() {
-        // $posts = Post::all();
-
-        $category = Category::find(1);
-
-        // $posts = Post::where('category_id', $category->id)->get();
-
-        $post = Post::find(1);
-        dd($post->tags);
+        $posts = Post::all();
 
 
-        // return view('post.index', compact('posts'));
+
+        return view('post.index', compact('posts'));
 
     }
 
@@ -48,17 +44,36 @@ class PostController extends Controller
 
         // dd('created');
 
-        return view('post.create');
+        $categories = Category::all();
+        $tags = Tag::all();
+
+        return view('post.create', compact('categories','tags'));
     }
 
     public function store() {
 
         $data = request()->validate([
-            'title' => 'string',
+            'title' => 'required|string',
             'content' => 'string',
-            'image' => 'string'
+            'image' => 'string',
+            'category_id' => '',
+            'tags' => ''
         ]);
-        Post::create($data);
+
+        $tags = $data['tags'];
+        unset($data['tags']);
+
+        $post = Post::create($data);
+
+        // foreach ($tags as $tag){
+        //     PostTag::firstOrCreate([
+        //         'tag_id' => $tag,
+        //         'post_id' => $post->id
+        //     ]);
+        // } // неправильный способ связки постов с тегами в таблице PostTag
+
+        $post->tags()->attach($tags); //правильный способ связки. Обратить внимание на model Post.php - объявление связи один ко многим. без неё не работает
+
         return redirect()->route('post.index');
     }
 
@@ -69,16 +84,29 @@ class PostController extends Controller
     }
 
     public function edit(Post $post){
-        return view('post.edit', compact('post'));
+        $categories = Category::all();
+        $tags = Tag::all();
+
+
+        return view('post.edit', compact('post','categories', 'tags'));
     }
 
     public function update(Post $post) {
         $data = request()->validate([
             'title' => 'string',
             'content' => 'string',
-            'image' => 'string'
+            'image' => 'string',
+            'category_id' => '',
+            'tags' => ''
         ]);
+
+        $tags = $data['tags'];
+        unset($data['tags']);
+
         $post->update($data);
+        $post = $post->fresh(); //обновить данные (как рефреш на рабочем столе)
+        // $post->tags()->attach(); // не подойдет для метода update
+        $post->tags()->sync($tags); // этот подходит. синхронит значения. удаляет ненужные. добавляет новые
 
         return redirect()->route('post.show', $post);
     }
