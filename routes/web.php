@@ -31,14 +31,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/posts', IndexController::class)->name('post.index');
 
-Route::get('/posts/create', CreateController::class)->name('post.create');
-Route::post('/posts', StoreController::class)->name('post.store');
-Route::get('/posts/{post}', ShowController::class)->name('post.show');
-Route::get('/posts/{post}/edit', EditController::class)->name('post.edit');
-Route::patch('/posts/{post}', UpdateController::class)->name('post.update');
-Route::delete('/posts/{post}', DestroyController::class)->name('post.delete');
+Route::prefix('posts')->group(function(){
+    Route::get('/', IndexController::class)->name('post.index');
+
+    Route::get('/create', CreateController::class)->name('post.create');
+    Route::post('/', StoreController::class)->name('post.store');
+    Route::get('/{post}', ShowController::class)->name('post.show');
+    Route::get('/{post}/edit', EditController::class)->name('post.edit');
+    Route::patch('/{post}', UpdateController::class)->name('post.update');
+    Route::delete('/{post}', DestroyController::class)->name('post.delete');
+});
 
 // Route::group(['namespace' => 'Post'], function(){
 //     Route::get('/posts', 'IndexController')->name('post.index');
