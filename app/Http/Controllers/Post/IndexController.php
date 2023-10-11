@@ -8,11 +8,10 @@ use App\Http\Controllers\Controller;
 
 class IndexController  extends Controller
 {
-   // TODO: Implement __invoke() method.
 
    public function __invoke ()
    {
-        $posts = Post::all();
+        $posts = Post::paginate(10);
         return view('post.index', compact('posts'));
    }
 }
